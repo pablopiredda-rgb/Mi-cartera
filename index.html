@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Mi Cartera"/>
+<meta name="theme-color" content="#0d1117"/>
+<title>Mi Cartera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#080c12;color:#e8f0f8;font-family:'Inter','Helvetica Neue',sans-serif;font-size:14px;overscroll-behavior:none}
+::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-track{background:#0d1117}::-webkit-scrollbar-thumb{background:#1f2d3d;border-radius:2px}
+input,button{font-family:inherit;-webkit-appearance:none;appearance:none}
+button{cursor:pointer;transition:opacity .15s}button:active{opacity:.7}
+.mono{font-family:'JetBrains Mono','Fira Mono',monospace}
+#topbar{background:#0e1620;border-bottom:1px solid #1a2840;padding:10px 14px;position:sticky;top:0;z-index:100}
+#topbar-inner{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.app-title{font-weight:800;font-size:15px;letter-spacing:-.3px}
+.app-sub{font-size:9px;color:#5a7a92;margin-top:1px}
+.ccl-row{display:flex;align-items:center;gap:6px;margin-left:auto}
+.ccl-input{background:#0d1117;border:1px solid #2a3f55;color:#d0dde8;border-radius:5px;padding:4px 8px;font-size:12px;width:100px;font-family:'JetBrains Mono',monospace}
+#tabs{display:flex;gap:3px;background:#0d1117;padding:3px;border-radius:7px;margin-top:8px}
+.tab{padding:5px 10px;border-radius:5px;border:none;font-size:11px;font-weight:700;background:transparent;color:#5a7a92;transition:all .15s}
+.tab.active{background:#00bfae;color:#000}
+#summary{background:#0e1620;border-bottom:1px solid #1a2840;padding:10px 14px}
+.kpi-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px;overflow-x:auto}
+.kpi{flex-shrink:0}.kpi-label{font-size:9px;color:#7a9ab2;letter-spacing:.6px;text-transform:uppercase}
+.kpi-val{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:15px}
+.dist-bar{display:flex;height:5px;border-radius:3px;overflow:hidden;gap:1px}
+.dist-labels{display:flex;gap:12px;margin-top:4px}
+.dist-label{font-size:9px;display:flex;align-items:center;gap:4px}
+.dist-dot{width:6px;height:6px;border-radius:1px;display:inline-block;flex-shrink:0}
+#filterbar{padding:10px 14px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #1a2840;background:#0e1620}
+.search-input{background:#080c12;border:1px solid #1a2840;color:#e8f0f8;border-radius:5px;padding:6px 10px;font-size:12px;width:130px}
+.filter-btn{background:transparent;border:1px solid #1a2840;color:#7a9ab2;border-radius:5px;padding:5px 10px;font-size:11px;font-weight:600}
+.filter-btn.active{background:#00bfae;color:#000;border-color:#00bfae}
+.col-headers{display:grid;grid-template-columns:72px 1fr 100px 105px 36px;gap:4px;padding:6px 22px;border-bottom:1px solid #1a2840;background:#0e1620}
+.col-h{font-size:9px;color:#5a7a92;letter-spacing:.6px;text-transform:uppercase}
+.section-head{display:flex;align-items:center;gap:8px;padding:10px 10px 6px;background:#080c12;border-top:1px solid #1a2840}
+.section-bar{flex:1;height:1px}.section-val{font-family:'JetBrains Mono',monospace;font-size:10px;color:#5a7a92}
+.stock-row{border-bottom:1px solid #0d1520;border-left:3px solid transparent;transition:background .1s;background:#111a26;margin:3px 8px;border-radius:8px;overflow:hidden}
+.stock-row.open{background:#162030}
+.stock-main{display:grid;grid-template-columns:72px 1fr 100px 105px 36px;gap:4px;padding:11px 14px;cursor:pointer;align-items:center;user-select:none}
+.ticker{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:14px;color:#ffffff;letter-spacing:.3px}
+.risk-label{font-size:9px;margin-top:1px}
+.pills{display:flex;gap:3px;flex-wrap:wrap}
+.pill{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.4px;white-space:nowrap}
+.price-cell{text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;color:#ffffff;font-weight:700}
+.pnl-cell{text-align:right}
+.pnl-main{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700}
+.pnl-sub{font-family:'JetBrains Mono',monospace;font-size:9px;opacity:.8}
+.no-pos{color:#5a7a92;font-size:10px;text-align:right}
+.chevron{text-align:right;font-size:11px;color:#6a8aaa}
+.expanded{padding:4px 14px 14px}
+.pos-detail{display:flex;gap:14px;flex-wrap:wrap;background:#080c12;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:11px}
+.pos-item{color:#7a9ab2}.pos-item span{color:#ffffff;font-weight:600}
+.ma-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.ma-panel{background:#080c12;border-radius:8px;padding:10px}
+.ma-panel-title{font-size:9px;font-weight:700;letter-spacing:1px;margin-bottom:8px}
+.ma-bar-row{margin-bottom:5px}
+.ma-bar-labels{display:flex;justify-content:space-between;font-size:9px;margin-bottom:2px}
+.ma-bar-track{background:#1f2d3d;border-radius:2px;height:3px}
+.ma-bar-fill{height:3px;border-radius:2px;transition:width .3s}
+.signals{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.signal{border-radius:5px;padding:4px 7px;font-size:10px}
+.signal-sub{font-size:8px;margin-top:1px;opacity:.7}
+.load-ma-btn{background:rgba(0,191,174,.1);border:1px solid #00bfae;color:#00bfae;border-radius:5px;padding:6px 12px;font-size:11px;font-weight:600;margin-bottom:8px}
+.refresh-btn{background:transparent;border:1px solid #5a7a92;color:#5a7a92;border-radius:4px;padding:3px 8px;font-size:9px;margin-top:6px}
+#trades-wrap{overflow-x:auto;padding:0 0 80px}
+.trades-header{padding:12px 16px;font-weight:700;font-size:14px;border-bottom:1px solid #1f2d3d;background:#131920;position:sticky;top:0}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:480px}
+th{padding:7px 12px;text-align:left;font-size:9px;color:#5a7a92;letter-spacing:.6px;text-transform:uppercase;font-weight:600;border-bottom:1px solid #1f2d3d}
+td{padding:6px 12px;border-bottom:1px solid rgba(31,45,61,.4)}
+#summary-tab{padding:12px 14px 80px}
+.sum-card{background:#0e1620;border-radius:10px;padding:14px;margin-bottom:12px}
+.sum-card-title{font-weight:700;margin-bottom:12px;font-size:14px}
+.dist-item{margin-bottom:8px}
+.dist-item-row{display:flex;justify-content:space-between;margin-bottom:2px;flex-wrap:wrap;gap:4px}
+.dist-track{background:#1f2d3d;border-radius:2px;height:4px}
+.dist-fill{height:4px;border-radius:2px;transition:width .5s}
+.green{color:#2ecc8a}.red{color:#e05555}.cyan{color:#00bfae}.amber{color:#f0a500}.dim{color:#5a7a92}
+.empty{color:#5a7a92;text-align:center;padding:40px}
+.footer{text-align:center;color:#5a7a92;font-size:9px;padding:20px 14px 80px;font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div id="topbar-inner">
+    <div><div class="app-title"><span class="cyan">◈</span> Mi Cartera</div><div class="app-sub">Yahoo Finance · BYMA · CCL · 46 posiciones</div><div id="price-timestamp" style="font-size:9px;color:#00bfae;margin-top:1px"></div></div>
+    <div class="ccl-row"><span style="font-size:10px;color:#5a7a92">CCL:</span><input class="ccl-input mono" id="ccl-input" placeholder="cargando…" type="number"/></div>
+  </div>
+  <div id="tabs">
+    <button class="tab active" onclick="setTab('open')">Posiciones</button>
+    <button class="tab" onclick="setTab('watch')">Watchlist</button>
+    <button class="tab" onclick="setTab('summary')">Resumen</button>
+  </div>
+</div>
+<div id="summary"></div>
+<div id="filterbar"></div>
+<div id="col-headers" class="col-headers" style="display:none">
+  <div class="col-h">Ticker</div><div class="col-h"></div>
+  <div class="col-h" style="text-align:right">Precio</div>
+  <div class="col-h" style="text-align:right">Var. día / P&L</div>
+  <div class="col-h"></div>
+</div>
+<div id="main"></div>
+
+<script>
+/* ── DATA ─────────────────────────────────────────────────────────────── */
+const POSITIONS = [{"ticker":"NVDA","shares":33.508,"avgCost":121.49,"currentPrice":205.19,"group":"high","isArg":false},{"ticker":"GOOG","shares":16.5503,"avgCost":152.55,"currentPrice":358.16,"group":"high","isArg":false},{"ticker":"META","shares":10.3662,"avgCost":591.7,"currentPrice":566.98,"group":"high","isArg":false},{"ticker":"MSFT","shares":13.7843,"avgCost":427.31,"currentPrice":390.74,"group":"high","isArg":false},{"ticker":"MELI","shares":2.5165,"avgCost":1874.99,"currentPrice":1589.6,"group":"high","isArg":false},{"ticker":"UNH","shares":9.3631,"avgCost":280.79,"currentPrice":408.52,"group":"cons","isArg":false},{"ticker":"PLTR","shares":19.9999,"avgCost":136.07,"currentPrice":127.99,"group":"high","isArg":false},{"ticker":"AVGO","shares":6.6746,"avgCost":307.07,"currentPrice":382.07,"group":"high","isArg":false},{"ticker":"NU","shares":175.0,"avgCost":13.49,"currentPrice":12.19,"group":"high","isArg":false},{"ticker":"TGSU2.BA","shares":200.0,"avgCost":8549.0,"currentPrice":9915.0,"group":"arg","isArg":true},{"ticker":"VST","shares":9.2305,"avgCost":160.91,"currentPrice":148.02,"group":"high","isArg":false},{"ticker":"V","shares":3.944,"avgCost":301.37,"currentPrice":322.39,"group":"cons","isArg":false},{"ticker":"HUT","shares":10.0,"avgCost":109.04,"currentPrice":118.86,"group":"high","isArg":false},{"ticker":"CEG","shares":4.4271,"avgCost":310.95,"currentPrice":253.76,"group":"high","isArg":false},{"ticker":"SPOT","shares":2.093,"avgCost":564.54,"currentPrice":482.0,"group":"high","isArg":false},{"ticker":"GE","shares":2.875,"avgCost":232.2,"currentPrice":335.3,"group":"high","isArg":false},{"ticker":"MU","shares":0.8,"avgCost":922.75,"currentPrice":981.61,"group":"high","isArg":false},{"ticker":"TQQQ","shares":10.0,"avgCost":69.27,"currentPrice":77.52,"group":"high","isArg":false},{"ticker":"BRK-B","shares":1.5453,"avgCost":483.29,"currentPrice":489.25,"group":"cons","isArg":false},{"ticker":"IBM","shares":2.6667,"avgCost":241.56,"currentPrice":272.24,"group":"high","isArg":false},{"ticker":"BAC","shares":12.5,"avgCost":35.56,"currentPrice":56.02,"group":"cons","isArg":false},{"ticker":"IREN","shares":11.6666,"avgCost":53.79,"currentPrice":59.77,"group":"high","isArg":false},{"ticker":"BHIP.BA","shares":2500.0,"avgCost":354.0,"currentPrice":360.0,"group":"arg","isArg":true},{"ticker":"MSTR","shares":4.5,"avgCost":115.33,"currentPrice":123.97,"group":"high","isArg":false},{"ticker":"PAMP.BA","shares":148.0,"avgCost":4187.09,"currentPrice":5300.0,"group":"arg","isArg":true},{"ticker":"METR.BA","shares":400.0,"avgCost":1992.5,"currentPrice":1960.0,"group":"arg","isArg":true},{"ticker":"HD","shares":1.5625,"avgCost":294.0,"currentPrice":328.39,"group":"cons","isArg":false},{"ticker":"URA","shares":10.0,"avgCost":49.15,"currentPrice":45.52,"group":"high","isArg":false},{"ticker":"RKLB","shares":4.1666,"avgCost":116.35,"currentPrice":102.39,"group":"high","isArg":false},{"ticker":"GGAL.BA","shares":71.0,"avgCost":6311.27,"currentPrice":8230.0,"group":"arg","isArg":true},{"ticker":"LLY","shares":0.357,"avgCost":874.5,"currentPrice":1133.0,"group":"cons","isArg":false},{"ticker":"PCAR","shares":3.3326,"avgCost":95.18,"currentPrice":118.52,"group":"cons","isArg":false},{"ticker":"MCD","shares":1.25,"avgCost":273.0,"currentPrice":284.81,"group":"cons","isArg":false},{"ticker":"SNDK","shares":0.1764,"avgCost":1610.5,"currentPrice":1980.1,"group":"high","isArg":false},{"ticker":"NBIS","shares":1.4814,"avgCost":223.95,"currentPrice":232.36,"group":"high","isArg":false},{"ticker":"ALAB","shares":0.909,"avgCost":325.64,"currentPrice":367.15,"group":"high","isArg":false},{"ticker":"EDN.BA","shares":200.0,"avgCost":1812.5,"currentPrice":2080.0,"group":"arg","isArg":true},{"ticker":"ANET","shares":1.7233,"avgCost":153.9,"currentPrice":163.24,"group":"high","isArg":false},{"ticker":"LOMA.BA","shares":100.0,"avgCost":3450.0,"currentPrice":3750.0,"group":"arg","isArg":true},{"ticker":"BCS","shares":10.0,"avgCost":14.37,"currentPrice":25.47,"group":"cons","isArg":false},{"ticker":"ETHA","shares":20.0,"avgCost":11.95,"currentPrice":12.57,"group":"high","isArg":false},{"ticker":"CAT","shares":0.25,"avgCost":854.0,"currentPrice":910.57,"group":"cons","isArg":false},{"ticker":"BMA.BA","shares":20.0,"avgCost":10000.0,"currentPrice":14800.0,"group":"arg","isArg":true},{"ticker":"SLV","shares":3.3333,"avgCost":61.6,"currentPrice":61.29,"group":"cons","isArg":false},{"ticker":"CEPU.BA","shares":50.0,"avgCost":2100.0,"currentPrice":2380.0,"group":"arg","isArg":true},{"ticker":"NFLX","shares":0.6326,"avgCost":95.0,"currentPrice":80.34,"group":"high","isArg":false}];
+
+const WATCHLIST = [{"ticker":"A3.BA","currentPrice":3450.0,"group":"arg","isArg":true},{"ticker":"AAPL","currentPrice":291.13,"group":"cons","isArg":false},{"ticker":"ABBV","currentPrice":227.73,"group":"cons","isArg":false},{"ticker":"ABEV","currentPrice":3.25,"group":"cons","isArg":false},{"ticker":"ABNB","currentPrice":132.28,"group":"high","isArg":false},{"ticker":"ACN","currentPrice":170.28,"group":"cons","isArg":false},{"ticker":"ADBE","currentPrice":204.02,"group":"high","isArg":false},{"ticker":"ADP","currentPrice":226.21,"group":"cons","isArg":false},{"ticker":"AMAT","currentPrice":567.25,"group":"high","isArg":false},{"ticker":"AMD","currentPrice":511.57,"group":"high","isArg":false},{"ticker":"AMGN","currentPrice":355.2,"group":"cons","isArg":false},{"ticker":"AMZN","currentPrice":238.55,"group":"high","isArg":false},{"ticker":"ANF","currentPrice":90.57,"group":"cons","isArg":false},{"ticker":"ANF.BA","currentPrice":135700.0,"group":"arg","isArg":true},{"ticker":"ARCO","currentPrice":8.83,"group":"cons","isArg":false},{"ticker":"ASTS","currentPrice":82.41,"group":"high","isArg":false},{"ticker":"AUSO.BA","currentPrice":3755.0,"group":"arg","isArg":true},{"ticker":"BABA","currentPrice":112.82,"group":"high","isArg":false},{"ticker":"BBAR.BA","currentPrice":10260.0,"group":"arg","isArg":true},{"ticker":"BBD","currentPrice":3.5,"group":"cons","isArg":false},{"ticker":"BHP","currentPrice":90.82,"group":"cons","isArg":false},{"ticker":"BIDU","currentPrice":115.77,"group":"high","isArg":false},{"ticker":"BIOX","currentPrice":0.42,"group":"cons","isArg":false},{"ticker":"BKNG","currentPrice":164.94,"group":"cons","isArg":false},{"ticker":"BMY","currentPrice":57.13,"group":"cons","isArg":false},{"ticker":"BP","currentPrice":42.78,"group":"cons","isArg":false},{"ticker":"BPAT.BA","currentPrice":2100.0,"group":"arg","isArg":true},{"ticker":"BTC-USD","currentPrice":65526.68,"group":"high","isArg":false},{"ticker":"BYMA.BA","currentPrice":305.5,"group":"arg","isArg":true},{"ticker":"CAH","currentPrice":223.85,"group":"cons","isArg":false},{"ticker":"CCL","currentPrice":29.18,"group":"cons","isArg":false},{"ticker":"CDE","currentPrice":17.2,"group":"high","isArg":false},{"ticker":"CELU.BA","currentPrice":290.0,"group":"arg","isArg":true},{"ticker":"COIN","currentPrice":159.78,"group":"high","isArg":false},{"ticker":"COST","currentPrice":982.35,"group":"cons","isArg":false},{"ticker":"CRES.BA","currentPrice":1840.0,"group":"arg","isArg":true},{"ticker":"CRESY","currentPrice":12.36,"group":"cons","isArg":false},{"ticker":"CRM","currentPrice":165.89,"group":"high","isArg":false},{"ticker":"CRWV","currentPrice":100.55,"group":"high","isArg":false},{"ticker":"CSCO","currentPrice":121.1,"group":"cons","isArg":false},{"ticker":"CVS","currentPrice":101.96,"group":"cons","isArg":false},{"ticker":"CVX","currentPrice":187.22,"group":"cons","isArg":false},{"ticker":"DE","currentPrice":577.48,"group":"cons","isArg":false},{"ticker":"DEO","currentPrice":81.79,"group":"cons","isArg":false},{"ticker":"DIS","currentPrice":100.04,"group":"cons","isArg":false},{"ticker":"EA","currentPrice":203.27,"group":"cons","isArg":false},{"ticker":"ECOG.BA","currentPrice":3232.5,"group":"arg","isArg":true},{"ticker":"EQNR","currentPrice":36.18,"group":"cons","isArg":false},{"ticker":"F","currentPrice":14.84,"group":"cons","isArg":false},{"ticker":"FCX","currentPrice":68.41,"group":"high","isArg":false},{"ticker":"FDX","currentPrice":338.31,"group":"cons","isArg":false},{"ticker":"FIPL.BA","currentPrice":176.0,"group":"arg","isArg":true},{"ticker":"FSLR","currentPrice":267.31,"group":"high","isArg":false},{"ticker":"GBAN.BA","currentPrice":1910.0,"group":"arg","isArg":true},{"ticker":"GFI","currentPrice":36.5,"group":"high","isArg":false},{"ticker":"GGAL","currentPrice":55.16,"group":"high","isArg":false},{"ticker":"GGB","currentPrice":4.75,"group":"cons","isArg":false},{"ticker":"GILD","currentPrice":125.59,"group":"cons","isArg":false},{"ticker":"GLD","currentPrice":386.54,"group":"cons","isArg":false},{"ticker":"GLOB","currentPrice":37.49,"group":"high","isArg":false},{"ticker":"GLW","currentPrice":179.2,"group":"cons","isArg":false},{"ticker":"GRMN","currentPrice":238.1,"group":"cons","isArg":false},{"ticker":"GS","currentPrice":1062.75,"group":"cons","isArg":false},{"ticker":"GT","currentPrice":6.4,"group":"cons","isArg":false},{"ticker":"HAVA.BA","currentPrice":5460.0,"group":"arg","isArg":true},{"ticker":"HDB","currentPrice":24.17,"group":"high","isArg":false},{"ticker":"HL","currentPrice":15.29,"group":"high","isArg":false},{"ticker":"HMY","currentPrice":15.86,"group":"cons","isArg":false},{"ticker":"HOOD","currentPrice":93.19,"group":"high","isArg":false},{"ticker":"HSY","currentPrice":181.66,"group":"cons","isArg":false},{"ticker":"IBIT","currentPrice":36.04,"group":"high","isArg":false},{"ticker":"INFY","currentPrice":11.74,"group":"cons","isArg":false},{"ticker":"INTC","currentPrice":124.57,"group":"high","isArg":false},{"ticker":"INVJ.BA","currentPrice":442.0,"group":"arg","isArg":true},{"ticker":"IRS","currentPrice":16.69,"group":"cons","isArg":false},{"ticker":"IRSA.BA","currentPrice":2480.0,"group":"arg","isArg":true},{"ticker":"JD","currentPrice":28.56,"group":"high","isArg":false},{"ticker":"JMIA","currentPrice":7.08,"group":"high","isArg":false},{"ticker":"JNJ","currentPrice":240.87,"group":"cons","isArg":false},{"ticker":"KEEL","currentPrice":5.59,"group":"high","isArg":false},{"ticker":"KEEL.BA","currentPrice":41940.0,"group":"arg","isArg":true},{"ticker":"LITE","currentPrice":921.56,"group":"high","isArg":false},{"ticker":"LRCX","currentPrice":366.81,"group":"high","isArg":false},{"ticker":"LULU","currentPrice":118.77,"group":"high","isArg":false},{"ticker":"MA","currentPrice":489.98,"group":"cons","isArg":false},{"ticker":"MDLZ","currentPrice":62.99,"group":"cons","isArg":false},{"ticker":"MIRG.BA","currentPrice":17250.0,"group":"arg","isArg":true},{"ticker":"MMM","currentPrice":158.32,"group":"cons","isArg":false},{"ticker":"MO","currentPrice":71.94,"group":"cons","isArg":false},{"ticker":"MRK","currentPrice":119.05,"group":"cons","isArg":false},{"ticker":"MRSH","currentPrice":168.68,"group":"high","isArg":false},{"ticker":"MSI","currentPrice":412.25,"group":"high","isArg":false},{"ticker":"MSTR.BA","currentPrice":9240.0,"group":"arg","isArg":true},{"ticker":"MUX","currentPrice":18.91,"group":"high","isArg":false},{"ticker":"NEE","currentPrice":85.99,"group":"cons","isArg":false},{"ticker":"NET","currentPrice":228.48,"group":"high","isArg":false},{"ticker":"NG","currentPrice":7.44,"group":"high","isArg":false},{"ticker":"NKE","currentPrice":44.93,"group":"cons","isArg":false},{"ticker":"NTES","currentPrice":125.82,"group":"high","isArg":false},{"ticker":"NUE","currentPrice":266.35,"group":"cons","isArg":false},{"ticker":"NVS","currentPrice":153.07,"group":"cons","isArg":false},{"ticker":"OKLO","currentPrice":57.49,"group":"high","isArg":false},{"ticker":"ORCL","currentPrice":184.13,"group":"high","isArg":false},{"ticker":"ORLY","currentPrice":91.02,"group":"cons","isArg":false},{"ticker":"OXY","currentPrice":56.54,"group":"high","isArg":false},{"ticker":"PANW","currentPrice":279.62,"group":"high","isArg":false},{"ticker":"PBR","currentPrice":18.38,"group":"cons","isArg":false},{"ticker":"PEP","currentPrice":144.27,"group":"cons","isArg":false},{"ticker":"PG","currentPrice":149.61,"group":"cons","isArg":false},{"ticker":"PKX","currentPrice":63.32,"group":"cons","isArg":false},{"ticker":"PSX","currentPrice":179.45,"group":"cons","isArg":false},{"ticker":"QCOM","currentPrice":211.72,"group":"high","isArg":false},{"ticker":"RACE","currentPrice":354.91,"group":"high","isArg":false},{"ticker":"RGTI","currentPrice":20.98,"group":"high","isArg":false},{"ticker":"RIO","currentPrice":105.35,"group":"cons","isArg":false},{"ticker":"RIOT","currentPrice":26.61,"group":"high","isArg":false},{"ticker":"ROST","currentPrice":240.13,"group":"cons","isArg":false},{"ticker":"SAMI.BA","currentPrice":501.0,"group":"arg","isArg":true},{"ticker":"SATL","currentPrice":6.66,"group":"high","isArg":false},{"ticker":"SBUX","currentPrice":103.04,"group":"cons","isArg":false},{"ticker":"SCCO","currentPrice":189.79,"group":"high","isArg":false},{"ticker":"SE","currentPrice":82.94,"group":"high","isArg":false},{"ticker":"SHEL","currentPrice":85.66,"group":"cons","isArg":false},{"ticker":"SHOP","currentPrice":108.24,"group":"high","isArg":false},{"ticker":"SNA","currentPrice":387.48,"group":"cons","isArg":false},{"ticker":"SNOW","currentPrice":232.78,"group":"high","isArg":false},{"ticker":"SONY","currentPrice":20.53,"group":"cons","isArg":false},{"ticker":"SPCX","currentPrice":160.95,"group":"high","isArg":false},{"ticker":"STLA","currentPrice":6.87,"group":"cons","isArg":false},{"ticker":"SUPV.BA","currentPrice":3280.0,"group":"arg","isArg":true},{"ticker":"T","currentPrice":23.58,"group":"cons","isArg":false},{"ticker":"TECO2.BA","currentPrice":4570.0,"group":"arg","isArg":true},{"ticker":"TEM","currentPrice":47.82,"group":"high","isArg":false},{"ticker":"TEO","currentPrice":15.26,"group":"cons","isArg":false},{"ticker":"TGNO4.BA","currentPrice":4300.0,"group":"arg","isArg":true},{"ticker":"TJX","currentPrice":168.41,"group":"cons","isArg":false},{"ticker":"TM","currentPrice":174.95,"group":"cons","isArg":false},{"ticker":"TMO","currentPrice":469.34,"group":"high","isArg":false},{"ticker":"TRAN.BA","currentPrice":4000.0,"group":"arg","isArg":true},{"ticker":"TSLA","currentPrice":406.43,"group":"high","isArg":false},{"ticker":"TSM","currentPrice":423.93,"group":"high","isArg":false},{"ticker":"TTE","currentPrice":88.02,"group":"cons","isArg":false},{"ticker":"TXAR.BA","currentPrice":697.5,"group":"arg","isArg":true},{"ticker":"UBER","currentPrice":68.85,"group":"high","isArg":false},{"ticker":"URBN","currentPrice":77.0,"group":"cons","isArg":false},{"ticker":"VALE","currentPrice":15.71,"group":"cons","isArg":false},{"ticker":"VALO.BA","currentPrice":632.0,"group":"arg","isArg":true},{"ticker":"VIST","currentPrice":72.14,"group":"high","isArg":false},{"ticker":"VOD","currentPrice":15.53,"group":"cons","isArg":false},{"ticker":"VRSN","currentPrice":279.89,"group":"high","isArg":false},{"ticker":"VZ","currentPrice":48.11,"group":"cons","isArg":false},{"ticker":"WMT","currentPrice":121.04,"group":"cons","isArg":false},{"ticker":"XP","currentPrice":16.02,"group":"high","isArg":false},{"ticker":"XROX.BA","currentPrice":5170.0,"group":"arg","isArg":true},{"ticker":"XRX","currentPrice":3.47,"group":"cons","isArg":false},{"ticker":"YPF","currentPrice":55.89,"group":"high","isArg":false},{"ticker":"YPFD.BA","currentPrice":83475.0,"group":"arg","isArg":true}];
+
+/* ── STATE ─────────────────────────────────────────────────────────────── */
+const state = {
+  stocks: POSITIONS.map(s=>({...s,ma8d:0,ma21d:0,ma50d:0,ma200d:0,ma8w:0,ma21w:0,ma50w:0,ma200w:0})),
+  watchlist: WATCHLIST.map(s=>({...s,shares:0,avgCost:0,ma8d:0,ma21d:0,ma50d:0,ma200d:0,ma8w:0,ma21w:0,ma50w:0,ma200w:0})),
+  ccl:null, tab:'open', filter:'all', search:'', expanded:{}, loadingMA:{},
+};
+
+/* ── HELPERS ───────────────────────────────────────────────────────────── */
+const fmt=(n,d=2)=>n==null?'—':Number(n).toLocaleString('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtUSD=n=>`$${fmt(n,2)}`;
+const fmtARS=n=>`$${fmt(n,0)} ARS`;
+const pctStr=n=>`${n>=0?'+':''}${fmt(n,2)}%`;
+const clr=n=>n>=0?'#2ecc8a':'#e05555';
+const gc=s=>s.isArg?'#f0a500':s.group==='high'?'#7c5cfc':'#2a7fd4';
+const getCCL=()=>{const v=document.getElementById('ccl-input').value;return v?parseFloat(v):state.ccl;};
+
+function riskLevel(s){
+  if(!s.ma50d)return null;
+  const a=[s.ma8d,s.ma21d,s.ma50d,s.ma200d].filter(m=>m&&s.currentPrice>m).length;
+  if(a===4)return{label:'Alcista',dot:'●',color:'#2ecc8a'};
+  if(a>=2) return{label:'Neutral',dot:'◆',color:'#f0a500'};
+  return{label:'Bajista',dot:'▼',color:'#e05555'};
+}
+function pill(text,color){return `<span class="pill" style="background:${color}22;color:${color};border:1px solid ${color}44">${text}</span>`;}
+
+/* ── FETCH ─────────────────────────────────────────────────────────────── */
+async function fetchCCL(){
+  try{const r=await fetch('https://api.bluelytics.com.ar/v2/latest');const j=await r.json();return j?.ccl?.value_buy||null;}catch{}
+  try{const r=await fetch('https://dolarapi.com/v1/dolares/contadoconliqui');const j=await r.json();return j?.compra||null;}catch{}
+  return null;
+}
+const TWELVE_KEY = '7e22288b7d4a4944aea9c62a872a4c6c';
+const TD = 'https://api.twelvedata.com';
+
+// Safari-safe fetch — no AbortController
+function safeFetch(url) {
+  return fetch(url).then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+}
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+async function fetchMA(ticker){
+  const t = ticker.replace('.BA','');
+  const base = `${TD}/sma?symbol=${t}&apikey=${TWELVE_KEY}`;
+
+  try {
+    const getSMA = async (period, interval) => {
+      try {
+        const url = `${base}&interval=${interval}&time_period=${period}&outputsize=1`;
+        const js = await safeFetch(url);
+        if (js.status === 'error') {
+          console.warn('SMA error', period, interval, js.message);
+          return null;
+        }
+        return parseFloat(js.values?.[0]?.sma) || null;
+      } catch(e) { return null; }
+    };
+
+    // Precio
+    const priceJs = await safeFetch(`${TD}/price?symbol=${t}&apikey=${TWELVE_KEY}`);
+    if (priceJs.code || priceJs.status === 'error') return null;
+    const currentPrice = parseFloat(priceJs.price) || null;
+
+    // Esperar 500ms entre cada llamada para no superar el rate limit
+    await delay(500);
+    const ma8d = await getSMA(8, '1day');
+    await delay(500);
+    const ma21d = await getSMA(21, '1day');
+    await delay(500);
+    const ma50d = await getSMA(50, '1day');
+    await delay(500);
+    const ma200d = await getSMA(200, '1day');
+    await delay(500);
+    const ma8w = await getSMA(8, '1week');
+    await delay(500);
+    const ma21w = await getSMA(21, '1week');
+    await delay(500);
+    const ma50w = await getSMA(50, '1week');
+    await delay(500);
+    const ma200w = await getSMA(200, '1week');
+
+    return { currentPrice, ma8d, ma21d, ma50d, ma200d, ma8w, ma21w, ma50w, ma200w };
+
+  } catch(e) {
+    console.error('fetchMA:', e.name, e.message);
+    return null;
+  }
+}
+
+fetchCCL().then(v=>{if(v){state.ccl=v;document.getElementById('ccl-input').placeholder=`${fmt(v,0)} (auto)`;}renderSummary();});
+document.getElementById('ccl-input').addEventListener('input',()=>{renderSummary();renderMain();});
+
+/* ── SUMMARY ───────────────────────────────────────────────────────────── */
+function renderSummary(){
+  const ccl=getCCL();
+  const usd=state.stocks.filter(s=>!s.isArg);
+  const ars=state.stocks.filter(s=>s.isArg);
+  const totalUSD=usd.reduce((a,s)=>a+s.shares*s.currentPrice,0);
+  const totalCost=usd.reduce((a,s)=>a+s.shares*s.avgCost,0);
+  const pnl=totalUSD-totalCost;const pnlPct=totalCost?pnl/totalCost*100:0;
+  const totalARS=ars.reduce((a,s)=>a+s.shares*s.currentPrice,0);
+  const arsUSD=ccl?totalARS/ccl:0;
+  const grand=totalUSD+arsUSD;
+  const highV=usd.filter(s=>s.group==='high').reduce((a,s)=>a+s.shares*s.currentPrice,0);
+  const consV=usd.filter(s=>s.group==='cons').reduce((a,s)=>a+s.shares*s.currentPrice,0);
+  const hp=grand?highV/grand*100:0,cp=grand?consV/grand*100:0,ap=grand?arsUSD/grand*100:0;
+  document.getElementById('summary').innerHTML=`
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Cartera USD</div><div class="kpi-val cyan">$${fmt(totalUSD,0)}</div></div>
+      <div class="kpi"><div class="kpi-label">P&L USD</div><div class="kpi-val" style="color:${clr(pnl)}">${pnl>=0?'+':''}$${fmt(pnl,0)}</div></div>
+      <div class="kpi"><div class="kpi-label">Retorno</div><div class="kpi-val" style="color:${clr(pnlPct)}">${pctStr(pnlPct)}</div></div>
+      <div class="kpi"><div class="kpi-label">Cartera ARS</div><div class="kpi-val amber">$${fmt(totalARS,0)}</div></div>
+      <div class="kpi"><div class="kpi-label">CCL</div><div class="kpi-val dim">${ccl?'$'+fmt(ccl,0):'—'}</div></div>
+      <div class="kpi"><div class="kpi-label">Total equiv.</div><div class="kpi-val" style="color:#d0dde8">$${fmt(grand,0)} USD</div></div>
+    </div>
+    <div class="dist-bar">
+      <div style="width:${hp}%;background:#7c5cfc;min-width:${hp>0?2:0}px"></div>
+      <div style="width:${cp}%;background:#2a7fd4;min-width:${cp>0?2:0}px"></div>
+      <div style="width:${ap}%;background:#f0a500;min-width:${ap>0?2:0}px"></div>
+    </div>
+    <div class="dist-labels">
+      <span class="dist-label" style="color:#7c5cfc"><span class="dist-dot" style="background:#7c5cfc"></span>IA/Tech ${fmt(hp,1)}%</span>
+      <span class="dist-label" style="color:#2a7fd4"><span class="dist-dot" style="background:#2a7fd4"></span>Conserv. ${fmt(cp,1)}%</span>
+      <span class="dist-label" style="color:#f0a500"><span class="dist-dot" style="background:#f0a500"></span>ARG ${fmt(ap,1)}%</span>
+    </div>`;
+}
+
+/* ── FILTER BAR ─────────────────────────────────────────────────────────── */
+function renderFilterBar(){
+  const show=state.tab!=='summary';
+  document.getElementById('filterbar').style.display=show?'flex':'none';
+  document.getElementById('col-headers').style.display=show?'grid':'none';
+  if(!show)return;
+  const filters=[['all','Todas'],['high','IA/Tech'],['cons','Conserv.'],['arg','ARG']];
+  document.getElementById('filterbar').innerHTML=`
+    <input class="search-input" placeholder="Buscar…" value="${state.search}" oninput="doSearch(this.value)"/>
+    ${filters.map(([v,l])=>`<button class="filter-btn${state.filter===v?' active':''}" onclick="setFilter('${v}')">${l}</button>`).join('')}
+    <button onclick="updatePrices()" style="margin-left:auto;background:transparent;border:1px solid #1a2840;color:#00bfae;border-radius:5px;padding:5px 10px;font-size:11px;font-weight:600">↺ Actualizar</button>`;
+}
+
+/* ── MA BARS & SIGNALS ───────────────────────────────────────────────────── */
+function renderMABars(s){
+  const d=[['MA 8D',s.ma8d],['MA 21D',s.ma21d],['MA 50D',s.ma50d],['MA 200D',s.ma200d]];
+  const w=[['MA 8W',s.ma8w],['MA 21W',s.ma21w],['MA 50W',s.ma50w],['MA 200W',s.ma200w]];
+  const bar=(l,ma,wkly)=>{
+    if(!ma)return'';
+    const pct=((s.currentPrice-ma)/ma*100),wd=Math.min(Math.abs(pct)*2.5,100),c=pct>=0?'#2ecc8a':'#e05555';
+    return`<div class="ma-bar-row"><div class="ma-bar-labels"><span style="color:${wkly?'#f0a500':'#00bfae'};font-family:monospace;font-size:9px">${l}</span><span style="color:${c};font-family:monospace;font-size:10px">${pct>=0?'+':''}${pct.toFixed(1)}%</span></div><div class="ma-bar-track"><div class="ma-bar-fill" style="width:${wd}%;background:${c}"></div></div></div>`;
+  };
+  return`<div class="ma-grid"><div class="ma-panel"><div class="ma-panel-title" style="color:#00bfae">DIARIAS</div>${d.map(([l,m])=>bar(l,m,false)).join('')}</div><div class="ma-panel"><div class="ma-panel-title" style="color:#f0a500">SEMANALES</div>${w.map(([l,m])=>bar(l,m,true)).join('')}</div></div>`;
+}
+function renderSignals(s){
+  const p=s.currentPrice;
+  const checks=[
+    {label:'Entrada corto',sub:'> MA8 y MA21',ok:s.ma8d&&s.ma21d&&p>s.ma8d&&p>s.ma21d,danger:false},
+    {label:'Tendencia media',sub:'> MA50',ok:s.ma50d&&p>s.ma50d,danger:false},
+    {label:'Bull LP',sub:'> MA200',ok:s.ma200d&&p>s.ma200d,danger:false},
+    {label:'⚠ Riesgo',sub:'< MA50',ok:s.ma50d&&p<s.ma50d,danger:true},
+    {label:'⚠ Bear semanal',sub:'< MA21W',ok:s.ma21w&&p<s.ma21w,danger:true},
+  ].filter(c=>!c.danger||c.ok);
+  return`<div class="signals">${checks.map(c=>{const col=c.danger?'#e05555':(c.ok?'#2ecc8a':'#5a7a92');return`<div class="signal" style="background:${col}18;border:1px solid ${col}33;color:${col}">${c.ok?(c.danger?'⚠':'✓'):'—'} ${c.label}<div class="signal-sub">${c.sub}</div></div>`;}).join('')}</div>`;
+}
+
+/* ── STOCK ROW ───────────────────────────────────────────────────────────── */
+function renderStockRow(s,listKey){
+  const ccl=getCCL();const p=s.currentPrice;
+  const pnlVal=s.shares>0?(p-s.avgCost)*s.shares:null;
+  const pnlPct=s.shares>0&&s.avgCost?(p-s.avgCost)/s.avgCost*100:null;
+  const posVal=s.shares*p;const posARS=posVal*(ccl||1);
+  const rs=riskLevel(s);const gc_=gc(s);const open=state.expanded[listKey+'_'+s.ticker];
+  const maLoaded=s.ma50d>0;
+  const _maState=state.loadingMA[listKey+'_'+s.ticker];
+  const loading=_maState==='loading';
+  const maError=_maState==='error';
+
+  let expandedHTML='';
+  if(open){
+    const posD=s.shares>0?`<div class="pos-detail">
+      <span class="pos-item">Acciones: <span>${fmt(s.shares,4)}</span></span>
+      <span class="pos-item">Prom: <span>${s.isArg?fmtARS(s.avgCost):fmtUSD(s.avgCost)}</span></span>
+      <span class="pos-item">Valor: <span>${s.isArg?fmtARS(posVal):fmtUSD(posVal)}</span></span>
+      ${pnlVal!=null?`<span class="pos-item">P&L total: <span style="color:${clr(pnlVal)}">${pnlVal>=0?'+':''}${fmtUSD(pnlVal)} (${pctStr(pnlPct)})</span></span>`:''}
+      ${!s.isArg&&ccl?`<span class="pos-item">ARS: <span style="color:#f0a500">${fmtARS(posARS)}</span></span>`:''}
+    </div>`:'';
+    const maS=maLoaded
+      ?`${renderMABars(s)}${renderSignals(s)}<button class="refresh-btn" onclick="loadOneMA(event,'${s.ticker}','${listKey}')">↺ Actualizar MAs</button>`
+      :`<button class="load-ma-btn" style="${maError?'border-color:#e05555;color:#e05555':''}" onclick="loadOneMA(event,'${s.ticker}','${listKey}')">${loading?'⏳ Cargando…':maError?'⚠ Reintentar':'↓ Cargar Medias Móviles'}</button>`;
+    expandedHTML=`<div class="expanded">${posD}${maS}</div>`;
+  }
+
+  const priceStr=s.isArg?fmtARS(p):fmtUSD(p);
+  // Variación diaria + P&L posición
+  const hasDailyChange = s.dailyChangePct != null;
+  const pnlHTML = `<div style="text-align:right">
+    ${hasDailyChange
+      ? `<div class="pnl-main" style="color:${clr(s.dailyChangePct)}">${s.dailyChangePct>=0?'+':''}${fmt(s.dailyChangePct,2)}% hoy</div>
+         <div class="pnl-sub" style="color:${clr(s.dailyChange)}">${s.dailyChange>=0?'+':''}${fmtUSD(s.dailyChange)}</div>`
+      : ''
+    }
+    ${pnlVal!=null
+      ? `<div class="pnl-sub" style="color:${clr(pnlPct)};margin-top:2px;border-top:1px solid #1a2840;padding-top:2px">${pctStr(pnlPct)} total</div>`
+      : !hasDailyChange ? `<div class="no-pos">seguimiento</div>` : ''
+    }
+  </div>`;
+  const pillsHTML=[pill(s.isArg?'ARG':s.group==='high'?'IA/Tech':'Conserv.',gc_),maLoaded?pill('MA✓','#00bfae'):''].join('');
+
+  return`<div class="stock-row${open?' open':''}" style="border-left-color:${gc_}" id="row-${listKey}-${s.ticker.replace('.','-')}">
+    <div class="stock-main" onclick="toggleRow('${s.ticker}','${listKey}')">
+      <div><div class="ticker">${s.ticker}</div>${rs?`<div class="risk-label" style="color:${rs.color}">${rs.dot} ${rs.label}</div>`:''}</div>
+      <div class="pills">${pillsHTML}</div>
+      <div class="price-cell">${priceStr}</div>
+      <div class="pnl-cell">${pnlHTML}</div>
+      <div class="chevron">${open?'▲':'▼'}</div>
+    </div>${expandedHTML}
+  </div>`;
+}
+
+function sectionHead(label,color,list){
+  if(!list.length)return'';
+  const val=list.filter(s=>s.shares>0).reduce((a,s)=>a+s.shares*s.currentPrice,0);
+  const valStr=list[0]?.isArg?fmtARS(val):val?fmtUSD(val):'';
+  return`<div class="section-head">
+    <div style="width:7px;height:7px;border-radius:1px;background:${color};flex-shrink:0"></div>
+    <span style="font-size:10px;font-weight:700;color:${color};letter-spacing:.8px">${label}</span>
+    <span class="pill" style="background:${color}22;color:${color};border:1px solid ${color}44">${list.length}</span>
+    <div class="section-bar" style="background:${color}22"></div>
+    ${valStr?`<span class="section-val">${valStr}</span>`:''}
+  </div>`;
+}
+
+function applyFilters(list){
+  return list.filter(s=>{
+    if(state.filter==='high'&&s.group!=='high')return false;
+    if(state.filter==='cons'&&s.group!=='cons')return false;
+    if(state.filter==='arg'&&!s.isArg)return false;
+    if(state.search&&!s.ticker.toLowerCase().includes(state.search.toLowerCase()))return false;
+    return true;
+  });
+}
+
+/* ── RENDER MAIN ─────────────────────────────────────────────────────────── */
+function renderMain(){
+  const main=document.getElementById('main');
+  if(state.tab==='summary'){renderSummaryTab();return;}
+
+  const srcList=state.tab==='open'?state.stocks:state.watchlist;
+  const list=applyFilters(srcList);
+  const listKey=state.tab==='watch'?'w':'p';
+
+  if(!list.length){main.innerHTML='<div class="empty">Sin resultados.</div>';return;}
+  const all=state.filter==='all';
+  let html='';
+  if(all||state.filter==='high'){const l=list.filter(s=>s.group==='high'&&!s.isArg);if(l.length)html+=sectionHead('IA / TECNOLOGÍA / ALTA VOLATILIDAD','#7c5cfc',l)+l.map(s=>renderStockRow(s,listKey)).join('');}
+  if(all||state.filter==='cons'){const l=list.filter(s=>s.group==='cons'&&!s.isArg);if(l.length)html+=sectionHead('CONSERVADORAS / CEDEAR','#2a7fd4',l)+l.map(s=>renderStockRow(s,listKey)).join('');}
+  if(all||state.filter==='arg') {const l=list.filter(s=>s.isArg);if(l.length)html+=sectionHead('ACCIONES ARGENTINAS — BYMA (ARS)','#f0a500',l)+l.map(s=>renderStockRow(s,listKey)).join('');}
+  html+=`<div class="footer">Posiciones verificadas manualmente · Precios al 12/06/2026 · MAs bajo demanda</div>`;
+  main.innerHTML=html;
+}
+
+function renderSummaryTab(){
+  const ccl=getCCL()||1;
+  const grand=state.stocks.reduce((a,s)=>a+s.shares*s.currentPrice*(s.isArg?1/ccl:1),0);
+  const sorted=[...state.stocks].sort((a,b)=>{
+    const va=a.shares*a.currentPrice*(a.isArg?1/ccl:1);
+    const vb=b.shares*b.currentPrice*(b.isArg?1/ccl:1);
+    return vb-va;
+  });
+  const items=sorted.map(s=>{
+    const val=s.shares*s.currentPrice;const valUSD=s.isArg?val/ccl:val;
+    const pct=grand?valUSD/grand*100:0;
+    const pnl=s.avgCost?(s.currentPrice-s.avgCost)*s.shares:0;
+    const pnlPct=s.avgCost?(s.currentPrice-s.avgCost)/s.avgCost*100:0;
+    const gc_=gc(s);
+    return`<div class="dist-item">
+      <div class="dist-item-row">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span class="mono" style="font-weight:700;color:#d0dde8;min-width:80px;font-size:12px">${s.ticker}</span>
+          <span style="font-size:10px;color:#5a7a92">${s.isArg?fmtARS(val):fmtUSD(val)}</span>
+          ${s.avgCost>0?`<span class="mono" style="font-size:10px;color:${clr(pnl)}">${pnl>=0?'+':''}${s.isArg?fmtARS(pnl):fmtUSD(pnl)} (${pctStr(pnlPct)})</span>`:''}
+        </div>
+        <span class="mono" style="font-size:11px;color:${gc_}">${fmt(pct,1)}%</span>
+      </div>
+      <div class="dist-track"><div class="dist-fill" style="width:${pct}%;background:${gc_}"></div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('main').innerHTML=`<div id="summary-tab"><div class="sum-card"><div class="sum-card-title">Distribución por posición (equiv. USD)</div>${items}</div></div>`;
+}
+
+/* ── ACTIONS ─────────────────────────────────────────────────────────────── */
+function setTab(t){
+  state.tab=t;
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+function setFilter(f){state.filter=f;render();}
+function doSearch(v){state.search=v;renderMain();renderFilterBar();}
+
+function toggleRow(ticker,listKey){
+  const key=listKey+'_'+ticker;
+  state.expanded[key]=!state.expanded[key];
+  renderMain();
+  setTimeout(()=>{
+    const id=`row-${listKey}-${ticker.replace('.','-')}`;
+    const el=document.getElementById(id);
+    if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});
+  },50);
+}
+
+async function loadOneMA(e,ticker,listKey){
+  e.stopPropagation();
+  const key=listKey+'_'+ticker;
+  if(state.loadingMA[key]==='loading')return;
+  state.loadingMA[key]='loading';renderMain();
+  const data=await fetchMA(ticker);
+  const list=listKey==='w'?state.watchlist:state.stocks;
+  const s=list.find(s=>s.ticker===ticker);
+  if(data&&s){Object.assign(s,data);state.loadingMA[key]='done';}
+  else{state.loadingMA[key]='error';}
+  renderMain();
+}
+
+/* ── AUTO PRECIO ─────────────────────────────────────────────────────── */
+let priceUpdateInterval = null;
+let lastPriceUpdate = null;
+
+// Rastreo de créditos usados hoy
+let creditsUsedToday = parseInt(localStorage.getItem('td_credits_'+new Date().toDateString())||'0');
+function trackCredit(){
+  creditsUsedToday++;
+  localStorage.setItem('td_credits_'+new Date().toDateString(), creditsUsedToday);
+}
+
+async function updatePrices(){
+  const usdStocks = state.stocks.filter(s=>!s.isArg);
+  if(!usdStocks.length) return;
+
+  // Plan free: 800 créditos/día, 8/min
+  // Con 46 acciones = 46 créditos por ciclo
+  // Ciclo cada 20 min = máx 3 ciclos/hora = 72 créditos/hora
+  // En 8 horas de mercado = ~576 créditos, dentro del límite
+
+  // Verificar que no superamos el límite diario
+  if(creditsUsedToday >= 750){
+    console.warn('Límite diario cerca, pausando actualizaciones');
+    updatePriceTimestamp('⚠ Límite diario alcanzado');
+    return;
+  }
+
+  for(let i=0; i<usdStocks.length; i++){
+    const s = usdStocks[i];
+    try {
+      const url = `${TD}/quote?symbol=${s.ticker}&apikey=${TWELVE_KEY}`;
+      const js = await safeFetch(url);
+      trackCredit();
+      if(js.status==='error' || js.code) continue;
+      
+      const newPrice = parseFloat(js.close) || parseFloat(js.price) || s.currentPrice;
+      const prevClose = parseFloat(js.previous_close) || null;
+      const change = prevClose ? newPrice - prevClose : null;
+      const changePct = prevClose ? (change/prevClose)*100 : null;
+      
+      s.currentPrice = newPrice;
+      s.dailyChange = change;
+      s.dailyChangePct = changePct;
+      
+      lastPriceUpdate = new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      renderSummary();
+      renderMain();
+      updatePriceTimestamp();
+      
+    } catch(e) { console.error('quote error', s.ticker, e); }
+    
+    // 10 segundos entre requests = 6/min, bien bajo el límite de 8/min
+    if(i < usdStocks.length-1) await delay(10000);
+  }
+}
+
+function updatePriceTimestamp(msg){
+  const el = document.getElementById('price-timestamp');
+  if(!el) return;
+  if(msg) { el.textContent = msg; el.style.color='#f0a500'; return; }
+  if(lastPriceUpdate) { el.textContent = `Precios actualizados: ${lastPriceUpdate}`; el.style.color='#00bfae'; }
+}
+
+function startPriceUpdates(){
+  updatePrices(); // Primera actualización inmediata
+  priceUpdateInterval = setInterval(updatePrices, 1200000); // Luego cada 20 min
+}
+
+function render(){renderSummary();renderFilterBar();renderMain();}
+render();
+startPriceUpdates();
+</script>
+</body>
+</html>
